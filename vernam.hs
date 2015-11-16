@@ -12,7 +12,7 @@ vernam = zipWith (\k m -> chr $ (xor `on` ord) k m) . cycle
 argList :: [String] -> [(Maybe String, Maybe String)]
 argList = foldl argEval []
 	where argEval args arg =
-		if (head arg) == '-' then
+		if head arg == '-' then
 			if isNothing $ lookup (Just arg) args then
 				args ++ [(Just arg, Nothing)]
 			else
