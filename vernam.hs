@@ -7,7 +7,7 @@ import System.Environment (getArgs)
 import System.IO (getContents, readFile)
 
 vernam :: String -> String -> String
-vernam message key = foldl (\acc char -> acc ++ [chr $ xor (ord char) $ ord $ key !! (length acc `mod` length key)]) [] message
+vernam = zipWith (\k m -> chr $ (xor `on` ord) k m) . cycle
 
 argList :: [String] -> [(Maybe String, Maybe String)]
 argList = foldl argEval []
@@ -62,7 +62,7 @@ main = do
 					else
 						getContents
 				key <- fromJust keyArg
-				putStr $ vernam input key
+				putStr $ vernam key input
 			else
 				error "Missing argument(s)"
 
