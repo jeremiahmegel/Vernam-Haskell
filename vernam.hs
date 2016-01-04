@@ -89,7 +89,15 @@ main = do
 	args <- fmap zip getArgs <*> P.getArgs
 	let
 		badArgs =
-			invalidFlags [Just "-i", Just "-if", Just "-k", Just "-kf"] $ argList args
+			invalidFlags
+				[
+					Just "-i",
+					Just "-if",
+					Just "-k",
+					Just "-kf"
+				]
+				$
+				argList args
 		in
 		if not $ null badArgs then
 			usage
