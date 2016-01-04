@@ -22,7 +22,7 @@ argList =
 				if isNothing $ lookup (Just arg) args then
 					args ++ [(Just arg, Nothing)]
 				else
-					error "Duplicate argument"
+					error $ "Duplicate argument: " ++ fst arg
 			else if null args || isJust (snd $ last args) then
 				args ++ [(Nothing, Just arg)]
 			else
@@ -50,14 +50,14 @@ argChoose choices args =
 			else if length valid == 0 then
 				Nothing
 			else
-				error "Argument conflict"
+				error $ "Argument conflict: " ++ (intercalate ", " $ map fromJust valid)
 
 assertArgVal :: String -> (Arg -> a) -> Maybe Arg -> a
 assertArgVal arg f s =
 	if isJust s then
 		f $ fromJust s
 	else
-		error "No value provided for argument"
+		error $ "No value provided: " ++ arg
 
 argVal :: String -> (Arg -> a) -> (String, Maybe Arg -> a)
 argVal arg f =
@@ -78,7 +78,7 @@ main = do
 			invalidFlags [Just "-i", Just "-if", Just "-k", Just "-kf"] $ argList args
 		in
 		if not $ null badArgs then
-			error "Invalid arguments"
+			error $ "Invalid argument(s): " ++ (intercalate ", " $ map (\(a, b) -> fromMaybe "" a ++ (if isJust a && isJust b then ": " else "") ++ fromMaybe "" b) $ badArgs)
 		else
 			let
 				inputArg =
