@@ -5,8 +5,8 @@ import Data.Char (chr, ord)
 import Data.Function (on)
 import Data.List (deleteFirstsBy, elemIndex, intercalate, intersect)
 import Data.Maybe (fromJust, fromMaybe, isJust, isNothing)
-import qualified System.Environment as E
-import System.Posix.Env.ByteString (getArgs)
+import System.Environment (getArgs)
+import qualified System.Posix.Env.ByteString as P
 
 type Arg = (String, B.ByteString)
 
@@ -22,7 +22,7 @@ argList =
 				if isNothing $ lookup (Just arg) args then
 					args ++ [(Just arg, Nothing)]
 				else
-					error $ "Duplicate argument: " ++ fst arg
+					usage
 			else if null args || isJust (snd $ last args) then
 				args ++ [(Nothing, Just arg)]
 			else
@@ -50,14 +50,14 @@ argChoose choices args =
 			else if length valid == 0 then
 				Nothing
 			else
-				error $ "Argument conflict: " ++ (intercalate ", " $ map fromJust valid)
+				usage
 
 assertArgVal :: String -> (Arg -> a) -> Maybe Arg -> a
 assertArgVal arg f s =
 	if isJust s then
 		f $ fromJust s
 	else
-		error $ "No value provided: " ++ arg
+		usage
 
 argVal :: String -> (Arg -> a) -> (String, Maybe Arg -> a)
 argVal arg f =
@@ -71,14 +71,28 @@ invalidFlags valid args =
 		$
 		map (\ f -> (f, Nothing)) valid
 
+usage :: a
+usage = error $
+	"Usage: vernam [-i MESSAGE | -if MESSAGE_FILE] (-k KEY | -kf KEY_FILE)\n"
+	++
+	"\n"
+	++
+	"-i  MESSAGE         A plaintext message\n"
+	++
+	"-if MESSAGE_FILE    The filename of a file containing a plaintext message\n"
+	++
+	"-k  KEY             A key\n"
+	++
+	"-kf KEY_FILE        The filename of a file containing a key\n"
+
 main = do
-	args <- fmap zip E.getArgs <*> getArgs
+	args <- fmap zip getArgs <*> P.getArgs
 	let
 		badArgs =
 			invalidFlags [Just "-i", Just "-if", Just "-k", Just "-kf"] $ argList args
 		in
 		if not $ null badArgs then
-			error $ "Invalid argument(s): " ++ (intercalate ", " $ map (\(a, b) -> fromMaybe "" a ++ (if isJust a && isJust b then ": " else "") ++ fromMaybe "" b) $ badArgs)
+			usage
 		else
 			let
 				inputArg =
@@ -103,5 +117,5 @@ main = do
 					key <- fromJust keyArg
 					B.putStr $ vernam key input
 				else
-					error "Missing argument(s)"
+					usage
 
