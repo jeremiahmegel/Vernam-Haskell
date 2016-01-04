@@ -1,42 +1,56 @@
+import Control.Applicative ((<*>))
 import Data.Bits (xor)
+import qualified Data.ByteString as B
 import Data.Char (chr, ord)
 import Data.Function (on)
 import Data.List (deleteFirstsBy, elemIndex, intercalate, intersect)
 import Data.Maybe (fromJust, fromMaybe, isJust, isNothing)
-import System.Posix.Env.ByteString (getArgs)
 import qualified System.Environment as E
-
-import qualified Data.ByteString as B
-import Data.Word (Word8)
-import Data.String (IsString, fromString)
+import System.Posix.Env.ByteString (getArgs)
 
 type Arg = (String, B.ByteString)
 
 vernam :: B.ByteString -> B.ByteString -> B.ByteString
-vernam key message = B.pack $ zipWith xor (cycle $ B.unpack key) (B.unpack message)
+vernam =
+	(\ k -> B.pack . (zipWith xor (cycle k))) `on` B.unpack
 
 argList :: [Arg] -> [(Maybe Arg, Maybe Arg)]
-argList = foldl argEval []
-	where argEval args arg =
-		if (head . fst) arg == '-' then
-			if isNothing $ lookup (Just arg) args then
-				args ++ [(Just arg, Nothing)]
+argList =
+	foldl
+		(\ args arg ->
+			if (head . fst) arg == '-' then
+				if isNothing $ lookup (Just arg) args then
+					args ++ [(Just arg, Nothing)]
+				else
+					error "Duplicate argument"
+			else if null args || isJust (snd $ last args) then
+				args ++ [(Nothing, Just arg)]
 			else
-				error "Duplicate argument"
-		else if null args || isJust (snd $ last args) then
-			args ++ [(Nothing, Just arg)]
-		else
-			init args ++ [(fst $ last args, Just arg)]
+				init args ++ [(fst $ last args, Just arg)]
+		)
+		[]
 
-argChoose :: [(String, (Maybe Arg -> a))] -> [(Maybe Arg, Maybe Arg)] -> Maybe a
+argChoose :: [(String, Maybe Arg -> a)] -> [(Maybe Arg, Maybe Arg)] -> Maybe a
 argChoose choices args =
-	if length valid == 1 then
-		Just $ (fromJust $ lookup (fromJust $ head valid) choices) $ fromJust $ lookup (Just $ fromJust $ head valid) (map (\(x, y) -> (fmap fst x, y)) args)
-	else if length valid == 0 then
-		Nothing
-	else
-		error "Argument conflict"
-	where valid = intersect (map (Just . fst) choices) $ map (fmap fst . fst) args
+	let
+		valid =
+			intersect
+				(map (Just . fst) choices)
+				$
+				map (fmap fst . fst) args
+		in
+			if length valid == 1 then
+				lookup (fromJust $ head valid) choices
+				<*>
+				(lookup
+					(head valid)
+					$
+					map (\ (f, v) -> (fmap fst f, v)) args
+				)
+			else if length valid == 0 then
+				Nothing
+			else
+				error "Argument conflict"
 
 assertArgVal :: String -> (Arg -> a) -> Maybe Arg -> a
 assertArgVal arg f s =
@@ -45,32 +59,49 @@ assertArgVal arg f s =
 	else
 		error "No value provided for argument"
 
-argVal :: String -> (Arg -> a) -> (String, (Maybe Arg) -> a)
-argVal arg f = (arg, assertArgVal arg f)
+argVal :: String -> (Arg -> a) -> (String, Maybe Arg -> a)
+argVal arg f =
+	(arg, assertArgVal arg f)
 
 invalidFlags :: [Maybe String] -> [(Maybe Arg, Maybe Arg)] -> [(Maybe String, Maybe String)]
-invalidFlags valid args = deleteFirstsBy ((==) `on` fst) (map (\(x, y) -> (fmap fst x, fmap fst y)) args) $ map (\x -> (x, Nothing)) valid
+invalidFlags valid args =
+	deleteFirstsBy
+		((==) `on` fst)
+		(map (\ (f, v) -> (fmap fst f, fmap fst v)) args)
+		$
+		map (\ f -> (f, Nothing)) valid
 
 main = do
-	cleanArgs <- E.getArgs
-	bsArgs <- getArgs
-	let args = zip cleanArgs bsArgs
-	let badArgs = invalidFlags (map Just ["-i", "-if", "-k", "-kf"]) $ argList args
-	if not $ null badArgs then
-		error "Invalid arguments"
-	else
-		let
-			inputArg = argChoose [argVal "-i" (return . snd), argVal "-if" (B.readFile . fst)] $ argList args
-			keyArg = argChoose [argVal "-k" (return . snd), argVal "-kf" (B.readFile . fst)] $ argList args
+	args <- fmap zip E.getArgs <*> getArgs
+	let
+		badArgs =
+			invalidFlags [Just "-i", Just "-if", Just "-k", Just "-kf"] $ argList args
 		in
-			if isJust keyArg then do
-				input <-
-					if isJust inputArg then
-						fromJust inputArg
-					else
-						B.getContents
-				key <- fromJust keyArg
-				B.putStr $ vernam key input
-			else
-				error "Missing argument(s)"
+		if not $ null badArgs then
+			error "Invalid arguments"
+		else
+			let
+				inputArg =
+					argChoose
+						[
+							argVal "-i" (return . snd),
+							argVal "-if" (B.readFile . fst)
+						]
+						$
+						argList args
+				keyArg =
+					argChoose
+						[
+							argVal "-k" (return . snd),
+							argVal "-kf" (B.readFile . fst)
+						]
+						$
+						argList args
+			in
+				if isJust keyArg then do
+					input <- fromMaybe B.getContents inputArg
+					key <- fromJust keyArg
+					B.putStr $ vernam key input
+				else
+					error "Missing argument(s)"
 
