@@ -2,23 +2,26 @@
 
 Computes a [Vernam Cipher](https://en.wikipedia.org/wiki/Gilbert_Vernam#The_Vernam_cipher).
 
-This approach reads the key and plaintext message as bytestreams and hence compares corresponding bytes from each message against each other rather than corresponding characters. This allows the program to process any binary data rather than only text data.
+This approach reads the key and data as bytestreams and hence compares
+corresponding bytes from each component against each other rather than
+corresponding characters. This allows the program to process any binary data
+rather than only text data.
 
 ## Usage
 
 Provide a key via one of the following flags:
 
-	-k  KEY             A key
-	-kf KEY_FILE        The filename of a file containing a key
+	-k  KEY             The key
+	-kf KEY_FILE        The filename of a file containing the key
 
 Provide a plaintext message either via one of the following flags or stdin:
 
-	-i  MESSAGE         A plaintext message
-	-if MESSAGE_FILE    The filename of a file containing a plaintext message
+	-i  MESSAGE         The data
+	-if MESSAGE_FILE    The filename of a file containing the data
 
 ## Output
 
-The program will output the ciphertext to stdout with no trailing newline.
+The program will output the processed data to stdout with no trailing newline.
 
 ## License
 

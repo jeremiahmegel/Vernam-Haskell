@@ -94,13 +94,13 @@ usage = error $
 	++
 	"\n"
 	++
-	"-k  KEY             A key\n"
+	"-k  KEY             The key\n"
 	++
-	"-kf KEY_FILE        The filename of a file containing a key\n"
+	"-kf KEY_FILE        The filename of a file containing the key\n"
 	++
-	"-i  MESSAGE         A plaintext message\n"
+	"-i  MESSAGE         The data\n"
 	++
-	"-if MESSAGE_FILE    The filename of a file containing a plaintext message\n"
+	"-if MESSAGE_FILE    The filename of a file containing the data\n"
 
 main = do
 	args <- fmap zip getArgs <*> P.getArgs
