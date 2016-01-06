@@ -90,17 +90,17 @@ invalidFlags valid args =
 
 usage :: a
 usage = error $
-	"Usage: vernam [-i MESSAGE | -if MESSAGE_FILE] (-k KEY | -kf KEY_FILE)\n"
+	"Usage: vernam (-k KEY | -kf KEY_FILE) [-i MESSAGE | -if MESSAGE_FILE]\n"
 	++
 	"\n"
-	++
-	"-i  MESSAGE         A plaintext message\n"
-	++
-	"-if MESSAGE_FILE    The filename of a file containing a plaintext message\n"
 	++
 	"-k  KEY             A key\n"
 	++
 	"-kf KEY_FILE        The filename of a file containing a key\n"
+	++
+	"-i  MESSAGE         A plaintext message\n"
+	++
+	"-if MESSAGE_FILE    The filename of a file containing a plaintext message\n"
 
 main = do
 	args <- fmap zip getArgs <*> P.getArgs
