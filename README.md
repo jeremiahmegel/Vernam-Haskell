@@ -14,13 +14,13 @@ a [one-time pad](https://en.wikipedia.org/wiki/One-time_pad) for full security.
 
 Provide a key via one of the following flags:
 
-	-k  KEY             The key
-	-kf KEY_FILE        The filename of a file containing the key
+	-k  KEY          The key
+	-kf KEY_FILE     The filename of a file containing the key
 
 Provide the data either via one of the following flags or stdin:
 
-	-i  DATA            The data
-	-if DATA_FILE       The filename of a file containing the data
+	-i  DATA         The data
+	-if DATA_FILE    The filename of a file containing the data
 
 ## Output
 
