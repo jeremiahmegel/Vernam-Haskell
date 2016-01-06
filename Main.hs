@@ -90,7 +90,7 @@ invalidFlags valid args =
 
 usage :: a
 usage = error $
-	"Usage: vernam (-k KEY | -kf KEY_FILE) [-i MESSAGE | -if MESSAGE_FILE]\n"
+	"Usage: vernam (-k KEY | -kf KEY_FILE) [-i DATA | -if DATA_FILE]\n"
 	++
 	"\n"
 	++
@@ -98,9 +98,9 @@ usage = error $
 	++
 	"-kf KEY_FILE        The filename of a file containing the key\n"
 	++
-	"-i  MESSAGE         The data\n"
+	"-i  DATA            The data\n"
 	++
-	"-if MESSAGE_FILE    The filename of a file containing the data\n"
+	"-if DATA_FILE       The filename of a file containing the data\n"
 
 main = do
 	args <- fmap zip getArgs <*> P.getArgs

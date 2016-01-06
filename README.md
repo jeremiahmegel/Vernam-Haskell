@@ -7,6 +7,9 @@ corresponding bytes from each component against each other rather than
 corresponding characters. This allows the program to process any binary data
 rather than only text data.
 
+The key will be cycled to match the length of the data. It is suggested to use
+a [one-time pad](https://en.wikipedia.org/wiki/One-time_pad) for full security.
+
 ## Usage
 
 Provide a key via one of the following flags:
@@ -14,7 +17,7 @@ Provide a key via one of the following flags:
 	-k  KEY             The key
 	-kf KEY_FILE        The filename of a file containing the key
 
-Provide a plaintext message either via one of the following flags or stdin:
+Provide the data either via one of the following flags or stdin:
 
 	-i  MESSAGE         The data
 	-if MESSAGE_FILE    The filename of a file containing the data
