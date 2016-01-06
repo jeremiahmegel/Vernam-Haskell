@@ -19,8 +19,8 @@ Provide a key via one of the following flags:
 
 Provide the data either via one of the following flags or stdin:
 
-	-i  MESSAGE         The data
-	-if MESSAGE_FILE    The filename of a file containing the data
+	-i  DATA            The data
+	-if DATA_FILE       The filename of a file containing the data
 
 ## Output
 
