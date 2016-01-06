@@ -29,7 +29,7 @@ type Arg = (String, B.ByteString)
 
 vernam :: B.ByteString -> B.ByteString -> B.ByteString
 vernam =
-	(\ k -> B.pack . (zipWith xor (cycle k))) `on` B.unpack
+	(\ key message -> B.pack $ zipWith xor (cycle key) message) `on` B.unpack
 
 argList :: [Arg] -> [(Maybe Arg, Maybe Arg)]
 argList =
