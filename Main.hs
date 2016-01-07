@@ -15,6 +15,8 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -}
 
+module Main (main) where
+
 import Control.Applicative ((<*>))
 import Data.Bits (xor)
 import qualified Data.ByteString as B
