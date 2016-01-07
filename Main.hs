@@ -18,9 +18,8 @@
 import Control.Applicative ((<*>))
 import Data.Bits (xor)
 import qualified Data.ByteString as B
-import Data.Char (chr, ord)
 import Data.Function (on)
-import Data.List (deleteFirstsBy, elemIndex, intercalate, intersect)
+import Data.List (deleteFirstsBy, intersect)
 import Data.Maybe (fromJust, fromMaybe, isJust, isNothing)
 import System.Environment (getArgs)
 import qualified System.Posix.Env.ByteString as P
@@ -90,7 +89,7 @@ invalidFlags valid args =
 
 usage :: a
 usage = error $
-	"Usage: vernam (-k KEY | -kf KEY_FILE) [-i DATA | -if DATA_FILE]\n"
+	"Usage: megelvernam (-k KEY | -kf KEY_FILE) [-i DATA | -if DATA_FILE]\n"
 	++
 	"\n"
 	++
@@ -116,31 +115,31 @@ main = do
 				$
 				argList args
 		in
-		if not $ null badArgs then
-			usage
-		else
-			let
-				inputArg =
-					argChoose
-						[
-							argVal "-i" (return . snd),
-							argVal "-if" (B.readFile . fst)
-						]
-						$
-						argList args
-				keyArg =
-					argChoose
-						[
-							argVal "-k" (return . snd),
-							argVal "-kf" (B.readFile . fst)
-						]
-						$
-						argList args
-			in
-				if isJust keyArg then do
-					input <- fromMaybe B.getContents inputArg
-					key <- fromJust keyArg
-					B.putStr $ vernam key input
-				else
-					usage
+			if null badArgs then
+				let
+					inputArg =
+						argChoose
+							[
+								argVal "-i" (return . snd),
+								argVal "-if" (B.readFile . fst)
+							]
+							$
+							argList args
+					keyArg =
+						argChoose
+							[
+								argVal "-k" (return . snd),
+								argVal "-kf" (B.readFile . fst)
+							]
+							$
+							argList args
+				in
+					if isJust keyArg then do
+						input <- fromMaybe B.getContents inputArg
+						key <- fromJust keyArg
+						B.putStr $ vernam key input
+					else
+						usage
+			else
+				usage
 
